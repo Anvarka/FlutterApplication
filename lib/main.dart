@@ -9,6 +9,8 @@ class FitnessFuelApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const seedColor = Color(0xFF4D6BFF);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Fitness & Nutrition',
