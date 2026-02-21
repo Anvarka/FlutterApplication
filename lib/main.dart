@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const FitnessCoachApp());
+  runApp(const FitnessFuelApp());
 }
 
-class FitnessCoachApp extends StatelessWidget {
-  const FitnessCoachApp({super.key});
+class FitnessFuelApp extends StatelessWidget {
+  const FitnessFuelApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,94 +13,92 @@ class FitnessCoachApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Fitness AI',
+      title: 'Fitness & Nutrition',
       theme: ThemeData(
-        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: seedColor,
+          seedColor: const Color(0xFF2E5BFF),
           brightness: Brightness.dark,
         ),
-        scaffoldBackgroundColor: const Color(0xFF0D1117),
+        useMaterial3: true,
       ),
-      home: const FitnessShell(),
+      home: const HomeScreen(),
     );
   }
 }
 
-class FitnessShell extends StatefulWidget {
-  const FitnessShell({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<FitnessShell> createState() => _FitnessShellState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _FitnessShellState extends State<FitnessShell> {
-  int _currentIndex = 0;
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
 
-  static const List<Widget> _screens = <Widget>[
-    DashboardScreen(),
-    WorkoutScreen(),
-    NutritionScreen(),
-    ProfileScreen(),
+  static const _pages = [
+    _DashboardPage(),
+    _WorkoutPlanPage(),
+    _NutritionPage(),
+    _ProgressPage(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(child: _screens[_currentIndex]),
+      body: SafeArea(child: _pages[_selectedIndex]),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (value) {
-          setState(() {
-            _currentIndex = value;
-          });
-        },
-        destinations: const <NavigationDestination>[
-          NavigationDestination(icon: Icon(Icons.dashboard_outlined), label: 'Главная'),
-          NavigationDestination(icon: Icon(Icons.fitness_center), label: 'Тренировки'),
-          NavigationDestination(icon: Icon(Icons.restaurant_menu), label: 'Питание'),
-          NavigationDestination(icon: Icon(Icons.person_outline), label: 'Профиль'),
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) => setState(() => _selectedIndex = index),
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Home'),
+          NavigationDestination(
+            icon: Icon(Icons.fitness_center_outlined),
+            label: 'Workout',
+          ),
+          NavigationDestination(icon: Icon(Icons.restaurant_menu), label: 'Food'),
+          NavigationDestination(icon: Icon(Icons.show_chart), label: 'Progress'),
         ],
       ),
     );
   }
 }
 
-class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
+class _DashboardPage extends StatelessWidget {
+  const _DashboardPage();
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: const <Widget>[
-        _WelcomeHeader(),
+      children: const [
+        _Header(),
         SizedBox(height: 16),
-        _WeeklyScheduleCard(),
+        _QuickStats(),
         SizedBox(height: 16),
         _TodayWorkoutCard(),
         SizedBox(height: 16),
-        _MacroProgressCard(),
+        _CaloriesCard(),
       ],
     );
   }
 }
 
-class _WelcomeHeader extends StatelessWidget {
-  const _WelcomeHeader();
+class _Header extends StatelessWidget {
+  const _Header();
 
   @override
   Widget build(BuildContext context) {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
+      children: [
         Text(
-          'Привет, Рустам 👋',
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
+          'Привет, чемпион! 👋',
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 6),
+        SizedBox(height: 4),
         Text(
-          'Цель: набрать мышечную массу за 4 недели',
+          'Твоя цель: набор мышц за 4 недели',
           style: TextStyle(color: Colors.white70),
         ),
       ],
@@ -108,37 +106,51 @@ class _WelcomeHeader extends StatelessWidget {
   }
 }
 
-class _WeeklyScheduleCard extends StatelessWidget {
-  const _WeeklyScheduleCard();
+class _QuickStats extends StatelessWidget {
+  const _QuickStats();
 
   @override
   Widget build(BuildContext context) {
-    const days = <String>['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+    return const Row(
+      children: [
+        Expanded(
+          child: _StatTile(label: 'Вес', value: '75.0 кг', icon: Icons.monitor_weight),
+        ),
+        SizedBox(width: 12),
+        Expanded(
+          child: _StatTile(label: 'Тренировки', value: '3/5', icon: Icons.sports_gymnastics),
+        ),
+      ],
+    );
+  }
+}
 
+class _StatTile extends StatelessWidget {
+  const _StatTile({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const Text(
-              'Недельный прогресс',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              children: days
-                  .map(
-                    (day) => ChoiceChip(
-                      selected: day == 'Вт' || day == 'Чт' || day == 'Сб',
-                      label: Text(day),
-                    ),
-                  )
-                  .toList(),
-            ),
+          children: [
+            Icon(icon, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 10),
-            const Text('3 из 5 тренировок выполнено на этой неделе'),
+            Text(label, style: const TextStyle(color: Colors.white70)),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
           ],
         ),
       ),
@@ -156,29 +168,18 @@ class _TodayWorkoutCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const Row(
-              children: <Widget>[
-                Icon(Icons.flash_on_rounded),
-                SizedBox(width: 8),
-                Text(
-                  'Сегодня: Спина + Бицепс',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-              ],
+          children: [
+            const Text(
+              'Сегодня: Верх тела',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 12),
-            const _ExerciseTile(name: 'Тяга верхнего блока', sets: '4 x 12'),
-            const _ExerciseTile(name: 'Тяга гантели к поясу', sets: '3 x 10'),
-            const _ExerciseTile(name: 'Сгибания штанги', sets: '4 x 8'),
             const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.play_arrow),
-                label: const Text('Начать тренировку (45 мин)'),
-              ),
+            const Text('Жим лёжа, тяга в наклоне, разводка — 45 минут.'),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('Начать тренировку'),
             ),
           ],
         ),
@@ -187,29 +188,8 @@ class _TodayWorkoutCard extends StatelessWidget {
   }
 }
 
-class _ExerciseTile extends StatelessWidget {
-  const _ExerciseTile({required this.name, required this.sets});
-
-  final String name;
-  final String sets;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Text(name),
-          Text(sets, style: const TextStyle(color: Colors.white70)),
-        ],
-      ),
-    );
-  }
-}
-
-class _MacroProgressCard extends StatelessWidget {
-  const _MacroProgressCard();
+class _CaloriesCard extends StatelessWidget {
+  const _CaloriesCard();
 
   @override
   Widget build(BuildContext context) {
@@ -218,13 +198,21 @@ class _MacroProgressCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const <Widget>[
-            Text('Питание сегодня', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-            SizedBox(height: 10),
-            _MacroLine(label: 'Калории', progress: 0.72, target: '2160 / 3000 ккал'),
-            _MacroLine(label: 'Белки', progress: 0.65, target: '130 / 200 г'),
-            _MacroLine(label: 'Углеводы', progress: 0.78, target: '235 / 300 г'),
-            _MacroLine(label: 'Жиры', progress: 0.54, target: '49 / 90 г'),
+          children: [
+            const Text(
+              'Питание на сегодня',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const LinearProgressIndicator(value: 0.68),
+            const SizedBox(height: 8),
+            const Text('2040 / 3000 ккал'),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.add),
+              label: const Text('Добавить приём пищи'),
+            ),
           ],
         ),
       ),
@@ -232,52 +220,32 @@ class _MacroProgressCard extends StatelessWidget {
   }
 }
 
-class _MacroLine extends StatelessWidget {
-  const _MacroLine({required this.label, required this.progress, required this.target});
-
-  final String label;
-  final double progress;
-  final String target;
+class _WorkoutPlanPage extends StatelessWidget {
+  const _WorkoutPlanPage();
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text('$label • $target'),
-          const SizedBox(height: 4),
-          LinearProgressIndicator(value: progress),
-        ],
-      ),
-    );
-  }
-}
-
-class WorkoutScreen extends StatelessWidget {
-  const WorkoutScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    const workouts = <(String, String, String)>[
-      ('Понедельник', 'Грудь + Трицепс', '50 минут'),
-      ('Среда', 'Ноги + Пресс', '55 минут'),
-      ('Пятница', 'Спина + Плечи', '45 минут'),
+    const workouts = [
+      ('Понедельник', 'Грудь + Трицепс'),
+      ('Среда', 'Спина + Бицепс'),
+      ('Пятница', 'Ноги + Плечи'),
     ];
 
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: <Widget>[
-        Text('План тренировок', style: Theme.of(context).textTheme.headlineSmall),
+      children: [
+        Text(
+          'План тренировок',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
         const SizedBox(height: 12),
         ...workouts.map(
-          (workout) => Card(
+          (item) => Card(
             child: ListTile(
-              leading: const CircleAvatar(child: Icon(Icons.fitness_center, size: 16)),
-              title: Text(workout.$1),
-              subtitle: Text(workout.$2),
-              trailing: Text(workout.$3),
+              leading: const Icon(Icons.check_circle_outline),
+              title: Text(item.$1),
+              subtitle: Text(item.$2),
+              trailing: const Icon(Icons.chevron_right),
             ),
           ),
         ),
@@ -286,77 +254,61 @@ class WorkoutScreen extends StatelessWidget {
   }
 }
 
-class NutritionScreen extends StatelessWidget {
-  const NutritionScreen({super.key});
+class _NutritionPage extends StatelessWidget {
+  const _NutritionPage();
 
   @override
   Widget build(BuildContext context) {
-    const meals = <(String, String, String)>[
-      ('Завтрак', 'Овсянка, яйца, банан', '620 ккал'),
-      ('Обед', 'Рис, курица, овощи', '830 ккал'),
-      ('Ужин', 'Лосось, картофель, салат', '590 ккал'),
-      ('Перекус', 'Творог + орехи', '280 ккал'),
+    const meals = [
+      ('Завтрак', 'Овсянка + яйца', '620 ккал'),
+      ('Обед', 'Рис + курица + овощи', '830 ккал'),
+      ('Ужин', 'Лосось + картофель', '590 ккал'),
     ];
 
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: <Widget>[
-        Text('Дневник питания', style: Theme.of(context).textTheme.headlineSmall),
+      children: [
+        Text('Питание', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 12),
         ...meals.map(
           (meal) => Card(
             child: ListTile(
-              leading: const Icon(Icons.restaurant),
               title: Text(meal.$1),
               subtitle: Text(meal.$2),
               trailing: Text(meal.$3),
             ),
           ),
         ),
-        const SizedBox(height: 8),
-        FilledButton.icon(
-          onPressed: () {},
-          icon: const Icon(Icons.add),
-          label: const Text('Добавить приём пищи'),
-        ),
       ],
     );
   }
 }
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+class _ProgressPage extends StatelessWidget {
+  const _ProgressPage();
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: const <Widget>[
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text('Профиль и прогресс', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          subtitle: Text('Отслеживай изменения тела и силовых показателей'),
+      children: const [
+        Text(
+          'Прогресс',
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 10),
+        SizedBox(height: 12),
         Card(
           child: ListTile(
             leading: Icon(Icons.monitor_weight_outlined),
             title: Text('Вес'),
-            subtitle: Text('Было: 63.0 кг • Сейчас: 65.4 кг'),
+            subtitle: Text('Было: 73.8 кг  •  Сейчас: 75.0 кг'),
           ),
         ),
         Card(
           child: ListTile(
-            leading: Icon(Icons.ssid_chart),
-            title: Text('Жим лёжа'),
-            subtitle: Text('40 кг → 52.5 кг за 5 недель'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            leading: Icon(Icons.flag_outlined),
-            title: Text('Цель недели'),
-            subtitle: Text('Сделать 4 тренировки и закрыть 90% плана по калориям'),
+            leading: Icon(Icons.bar_chart),
+            title: Text('Силовые показатели'),
+            subtitle: Text('Жим лёжа: 60 → 72.5 кг'),
           ),
         ),
       ],
