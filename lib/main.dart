@@ -1,122 +1,315 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const FitnessFuelApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class FitnessFuelApp extends StatelessWidget {
+  const FitnessFuelApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Fitness & Nutrition',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF2E5BFF),
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const HomeScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  static const _pages = [
+    _DashboardPage(),
+    _WorkoutPlanPage(),
+    _NutritionPage(),
+    _ProgressPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+      body: SafeArea(child: _pages[_selectedIndex]),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) => setState(() => _selectedIndex = index),
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Home'),
+          NavigationDestination(
+            icon: Icon(Icons.fitness_center_outlined),
+            label: 'Workout',
+          ),
+          NavigationDestination(icon: Icon(Icons.restaurant_menu), label: 'Food'),
+          NavigationDestination(icon: Icon(Icons.show_chart), label: 'Progress'),
+        ],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+    );
+  }
+}
+
+class _DashboardPage extends StatelessWidget {
+  const _DashboardPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: const [
+        _Header(),
+        SizedBox(height: 16),
+        _QuickStats(),
+        SizedBox(height: 16),
+        _TodayWorkoutCard(),
+        SizedBox(height: 16),
+        _CaloriesCard(),
+      ],
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  const _Header();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Привет, чемпион! 👋',
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 4),
+        Text(
+          'Твоя цель: набор мышц за 4 недели',
+          style: TextStyle(color: Colors.white70),
+        ),
+      ],
+    );
+  }
+}
+
+class _QuickStats extends StatelessWidget {
+  const _QuickStats();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        Expanded(
+          child: _StatTile(label: 'Вес', value: '75.0 кг', icon: Icons.monitor_weight),
+        ),
+        SizedBox(width: 12),
+        Expanded(
+          child: _StatTile(label: 'Тренировки', value: '3/5', icon: Icons.sports_gymnastics),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatTile extends StatelessWidget {
+  const _StatTile({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('You have pushed the button this many times:'),
+            Icon(icon, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 10),
+            Text(label, style: const TextStyle(color: Colors.white70)),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+              value,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+    );
+  }
+}
+
+class _TodayWorkoutCard extends StatelessWidget {
+  const _TodayWorkoutCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Сегодня: Верх тела',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text('Жим лёжа, тяга в наклоне, разводка — 45 минут.'),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('Начать тренировку'),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _CaloriesCard extends StatelessWidget {
+  const _CaloriesCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Питание на сегодня',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const LinearProgressIndicator(value: 0.68),
+            const SizedBox(height: 8),
+            const Text('2040 / 3000 ккал'),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.add),
+              label: const Text('Добавить приём пищи'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WorkoutPlanPage extends StatelessWidget {
+  const _WorkoutPlanPage();
+
+  @override
+  Widget build(BuildContext context) {
+    const workouts = [
+      ('Понедельник', 'Грудь + Трицепс'),
+      ('Среда', 'Спина + Бицепс'),
+      ('Пятница', 'Ноги + Плечи'),
+    ];
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Text(
+          'План тренировок',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 12),
+        ...workouts.map(
+          (item) => Card(
+            child: ListTile(
+              leading: const Icon(Icons.check_circle_outline),
+              title: Text(item.$1),
+              subtitle: Text(item.$2),
+              trailing: const Icon(Icons.chevron_right),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _NutritionPage extends StatelessWidget {
+  const _NutritionPage();
+
+  @override
+  Widget build(BuildContext context) {
+    const meals = [
+      ('Завтрак', 'Овсянка + яйца', '620 ккал'),
+      ('Обед', 'Рис + курица + овощи', '830 ккал'),
+      ('Ужин', 'Лосось + картофель', '590 ккал'),
+    ];
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Text('Питание', style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 12),
+        ...meals.map(
+          (meal) => Card(
+            child: ListTile(
+              title: Text(meal.$1),
+              subtitle: Text(meal.$2),
+              trailing: Text(meal.$3),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProgressPage extends StatelessWidget {
+  const _ProgressPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: const [
+        Text(
+          'Прогресс',
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 12),
+        Card(
+          child: ListTile(
+            leading: Icon(Icons.monitor_weight_outlined),
+            title: Text('Вес'),
+            subtitle: Text('Было: 73.8 кг  •  Сейчас: 75.0 кг'),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            leading: Icon(Icons.bar_chart),
+            title: Text('Силовые показатели'),
+            subtitle: Text('Жим лёжа: 60 → 72.5 кг'),
+          ),
+        ),
+      ],
     );
   }
 }
